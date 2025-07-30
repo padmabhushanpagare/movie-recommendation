@@ -2,12 +2,14 @@
 
 import streamlit as st
 import pandas as pd
+
 import os, sys
 sys.path.append(os.path.abspath("."))
 
 from src.data_loader import load_data
 from surprise import SVD, Dataset, Reader
 from surprise.model_selection import train_test_split
+from src.content_recommender import ContentRecommender
 
 st.set_page_config(page_title="Movie Recommender", layout="wide")
 
@@ -23,6 +25,7 @@ trainset = data.build_full_trainset()
 
 model = SVD()
 model.fit(trainset)
+content_rec = ContentRecommender(movies)
 
 # Sidebar: user selection
 user_ids = df['userId'].unique().tolist()
@@ -41,6 +44,23 @@ recs = pd.DataFrame({
     "movieId": top_movie_ids,
     "predicted_rating": [p.est for p in top_preds]
 }).merge(movies, on='movieId')[['title', 'predicted_rating']]
+
+st.subheader("🎬 Recommend Similar Movies (Content-Based)")
+
+movie_titles = movies["title"].sort_values().tolist()
+selected_movie = st.selectbox("Pick a movie:", movie_titles)
+
+if st.button("Get Similar Movies"):
+    with st.spinner("Finding similar movies..."):
+        recommendations = content_rec.get_similar_movies(selected_movie, top_n=5)
+
+    if recommendations:
+        st.success("You might also like:")
+        for title in recommendations:
+            st.write(f"- {title}")
+    else:
+        st.warning("No recommendations found.")
+
 
 # Display results
 st.subheader(f"Top 10 Recommendations for User {selected_user}")
