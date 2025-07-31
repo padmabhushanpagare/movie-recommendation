@@ -10,11 +10,11 @@ from src.data_loader import load_data
 from surprise import SVD, Dataset, Reader
 from surprise.model_selection import train_test_split
 from src.content_recommender import ContentRecommender
+from src.hybrid_recommender import HybridRecommender
 
 st.set_page_config(page_title="Movie Recommender", layout="wide")
 
 st.title("🎬 MovieLens Recommender System")
-
 # Load data
 ratings, movies, df = load_data()
 
@@ -61,6 +61,10 @@ if st.button("Get Similar Movies"):
     else:
         st.warning("No recommendations found.")
 
+st.subheader(f"🔀 Hybrid Recommendations for User {selected_user}")
+hybrid_model = HybridRecommender(model, content_rec, df, movies, alpha=0.7)
+hybrid_recs = hybrid_model.recommend(selected_user, top_n=10)
+st.table(hybrid_recs)
 
 # Display results
 st.subheader(f"Top 10 Recommendations for User {selected_user}")

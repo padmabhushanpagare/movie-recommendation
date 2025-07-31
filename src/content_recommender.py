@@ -31,3 +31,11 @@ class ContentRecommender:
         sim_scores = sim_scores[1:top_n+1]
         movie_indices_sorted = [i[0] for i in sim_scores]
         return self.movies["title"].iloc[movie_indices_sorted].tolist()
+    
+    def get_similarity_score(self, movie_id1, movie_id2):
+        try:
+            idx1 = self.movie_ids.index(movie_id1)
+            idx2 = self.movie.ids.index(movie_id2)
+            return self.get_similarity_matrix[idx1, idx2]
+        except:
+            return 0.0
